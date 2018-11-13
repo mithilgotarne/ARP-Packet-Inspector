@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFType;
+import org.projectfloodlight.openflow.types.ArpOpcode;
 import org.projectfloodlight.openflow.types.MacAddress;
 import org.projectfloodlight.openflow.types.VlanVid;
 import org.projectfloodlight.openflow.types.EthType;
@@ -107,7 +108,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
 //
 //                } else
 
-                logger.info("MAC Address: {} seen on switch: {}", eth.getSourceMACAddress().toString(), sw.getId().toString());
+                logger.info("Eth MAC Address: {} seen on switch: {}", eth.getSourceMACAddress().toString(), sw.getId().toString());
 
                 if (eth.getEtherType() == EthType.ARP) {
                     /* We got an ARP packet; get the payload from Ethernet */
@@ -116,7 +117,49 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                     /* Various getters and setters are exposed in ARP */
                     boolean gratuitous = arp.isGratuitous();
 
+                    logger.info("ARP Sender Hardware Address: {} seen on switch: {}", arp.getSenderHardwareAddress().toString(), sw.getId().toString());
 
+                    if(eth.getSourceMACAddress() != arp.getSenderHardwareAddress()) { //Rule 1
+                        logger.info("Rule 1 Triggered");
+                        //spoofDetected
+                    }
+
+                    logger.info("ARP Sender Protocol Address: {} seen on switch: {}", arp.getSenderProtocolAddress().toString(), sw.getId().toString());
+
+                    /* search controller, retrieve IPmatch for ARPsourceHardwareAddress
+                    if(IPmatch  != arp.getSenderProtocolAddress()) { //Rule 2
+                        logger.info("Rule 2 Triggered");
+                        //spoofDetected
+                    }
+                     */
+
+                    if(arp.getOpCode() == ArpOpcode.REQUEST) {
+                       if(!eth.isBroadcast()) { //Rule 3a, request should be a broadcast
+                           logger.info("Rule 3a Triggered");
+                           //spoofDetected
+                       }
+                    } else if (arp.getOpCode() == ArpOpcode.REPLY) {
+                        if(eth.isBroadcast()) {  //Rule 3b, reply shouldn't be a broadcast
+                            logger.info("Rule 3b Triggered");
+                            //spoofDetected
+                        }
+
+                        logger.info("ARP Target Hardware Address: {} seen on switch: {}", arp.getTargetHardwareAddress().toString(), sw.getId().toString());
+
+                        if(eth.getDestinationMACAddress() != arp.getTargetHardwareAddress()) { //Rule 4
+                            logger.info("Rule 4 Triggered");
+                            //spoofDetected
+                        }
+
+                        logger.info("ARP Target Protocol Address: {} seen on switch: {}", arp.getTargetProtocolAddress().toString(), sw.getId().toString());
+
+                        /* search controller, retrieve IPmatch for ARPtargetHardwareAddress
+                        if(IPmatch  != arp.getTargetProtocolAddress()) { //Rule 5
+                            logger.info("Rule 5 Triggered");
+                            //spoofDetected
+                        }
+                        */
+                    }
                 } else {
                     /* Unhandled ethertype */
                 }
