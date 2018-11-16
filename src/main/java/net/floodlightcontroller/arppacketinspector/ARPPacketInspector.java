@@ -129,7 +129,8 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
 
                     //*search controller for device matching given MAC and IP pair. If it exists, returns it in the iterator. If not a valid pair, iterator will be empty.
                     DeviceManagerImpl man = new DeviceManagerImpl();
-                    Iterator senderIterator = man.queryDevices(arp.getSenderHardwareAddress(), null, arp.getSenderProtocolAddress(), IPv6Address.NONE, DatapathId.NONE, OFPort.ZERO);
+                    Iterator senderIterator = man.queryDevices(arp.getSenderHardwareAddress(), null, arp.getSenderProtocolAddress(), //note arp ProtocolAddress is returning an IPv4 address
+                            IPv6Address.NONE, DatapathId.NONE, OFPort.ZERO);
                     if(!senderIterator.hasNext()) {
                         logger.info("Rule 2 Triggered");
                         //spoofDetected
@@ -156,7 +157,8 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                         logger.info("ARP Target Protocol Address: {} seen on switch: {}", arp.getTargetProtocolAddress().toString(), sw.getId().toString());
 
                         //*search controller for device matching given MAC and IP pair. If it exists, returns it in the iterator. If not a valid pair, iterator will be empty.
-                        Iterator targetIterator = man.queryDevices(arp.getTargetHardwareAddress(), null, arp.getTargetProtocolAddress(), IPv6Address.NONE, DatapathId.NONE, OFPort.ZERO);
+                        Iterator targetIterator = man.queryDevices(arp.getTargetHardwareAddress(), null, arp.getTargetProtocolAddress(), //note arp ProtocolAddress is returning an IPv4 address
+                                IPv6Address.NONE, DatapathId.NONE, OFPort.ZERO);
                         if(!targetIterator.hasNext()) {
                             logger.info("Rule 5 Triggered");
                             //spoofDetected
