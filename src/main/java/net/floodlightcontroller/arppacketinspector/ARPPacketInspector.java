@@ -108,7 +108,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
 //                    /* Still more to come... */
 //
 //                } else
-
+                try {
                 logger.info("Eth MAC Address: {} seen on switch: {}", eth.getSourceMACAddress().toString(), sw.getId().toString());
 
                 if (eth.getEtherType() == EthType.ARP) {
@@ -128,7 +128,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                     logger.info("ARP Sender Protocol Address: {} seen on switch: {}", arp.getSenderProtocolAddress().toString(), sw.getId().toString());
 
                     //*search controller for device matching given MAC and IP pair. If it exists, returns it in the iterator. If not a valid pair, iterator will be empty.
-                    try {
+
                         DeviceManagerImpl man = new DeviceManagerImpl();
                         Iterator senderIterator = man.queryDevices(arp.getSenderHardwareAddress(), null, arp.getSenderProtocolAddress(), //note arp ProtocolAddress is returning an IPv4 address
                                 IPv6Address.NONE, DatapathId.NONE, OFPort.ZERO);
@@ -168,11 +168,12 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
 
                     }
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+
                 } else {
                     /* Unhandled ethertypes */
+                }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 break;
             default:
