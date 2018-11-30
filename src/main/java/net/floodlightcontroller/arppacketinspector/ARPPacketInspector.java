@@ -121,8 +121,8 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                     logger.info("ARP Sender Hardware Address: {} seen on switch: {}", arp.getSenderHardwareAddress().toString(), sw.getId().toString());
 
                     if(eth.getSourceMACAddress() != arp.getSenderHardwareAddress()) { //Rule 1
-                        logger.info("Rule 1 Triggered");
-                        //spoofDetected
+                        logger.info("Spoof Rule 1 Triggered"); //spoofDetected
+                        return Command.STOP; //Stop processing on the packet
                     }
 
                     logger.info("ARP Sender Protocol Address: {} seen on switch: {}", arp.getSenderProtocolAddress().toString(), sw.getId().toString());
@@ -132,26 +132,26 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                     Iterator senderIterator = man.queryDevices(arp.getSenderHardwareAddress(), null, arp.getSenderProtocolAddress(), //note arp ProtocolAddress is returning an IPv4 address
                             IPv6Address.NONE, DatapathId.NONE, OFPort.ZERO);
                     if(!senderIterator.hasNext()) {
-                        logger.info("Rule 2 Triggered");
-                        //spoofDetected
+                        logger.info("Spoof Rule 2 Triggered"); //spoofDetected
+                        return Command.STOP; //Stop processing on the packet
                     }
 
                     if(arp.getOpCode() == ArpOpcode.REQUEST) {
                        if(!eth.isBroadcast()) { //Rule 3a, request should be a broadcast
-                           logger.info("Rule 3a Triggered");
-                           //spoofDetected
+                           logger.info("Spoof Rule 3a Triggered"); //spoofDetected
+                           return Command.STOP; //Stop processing on the packet
                        }
                     } else if (arp.getOpCode() == ArpOpcode.REPLY) {
                         if(eth.isBroadcast()) {  //Rule 3b, reply shouldn't be a broadcast
-                            logger.info("Rule 3b Triggered");
-                            //spoofDetected
+                            logger.info("Spoof Rule 3b Triggered"); //spoofDetected
+                            return Command.STOP; //Stop processing on the packet
                         }
 
                         logger.info("ARP Target Hardware Address: {} seen on switch: {}", arp.getTargetHardwareAddress().toString(), sw.getId().toString());
 
                         if(eth.getDestinationMACAddress() != arp.getTargetHardwareAddress()) { //Rule 4
-                            logger.info("Rule 4 Triggered");
-                            //spoofDetected
+                            logger.info("Spoof Rule 4 Triggered"); //spoofDetected
+                            return Command.STOP; //Stop processing on the packet
                         }
 
                         logger.info("ARP Target Protocol Address: {} seen on switch: {}", arp.getTargetProtocolAddress().toString(), sw.getId().toString());
@@ -160,19 +160,19 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                         Iterator targetIterator = man.queryDevices(arp.getTargetHardwareAddress(), null, arp.getTargetProtocolAddress(), //note arp ProtocolAddress is returning an IPv4 address
                                 IPv6Address.NONE, DatapathId.NONE, OFPort.ZERO);
                         if(!targetIterator.hasNext()) {
-                            logger.info("Rule 5 Triggered");
-                            //spoofDetected
+                            logger.info("Spoof Rule 5 Triggered");  //spoofDetected
+                            return Command.STOP; //Stop processing on the packet
                         }
 
                     }
                 } else {
-                    /* Unhandled ethertype */
+                    /* Unhandled ethertypes */
                 }
                 break;
             default:
                 break;
         }
-        return Command.CONTINUE;
+        return Command.CONTINUE; //pass packet to other modules to continue processing
     }
 
 }
