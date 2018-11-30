@@ -173,7 +173,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                     /* Unhandled ethertypes */
                 }
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
                 break;
             default:
