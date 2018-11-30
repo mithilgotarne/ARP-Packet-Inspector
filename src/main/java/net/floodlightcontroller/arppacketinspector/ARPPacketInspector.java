@@ -120,7 +120,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
 
                     logger.info("ARP Sender Hardware Address: {} seen on switch: {}", arp.getSenderHardwareAddress().toString(), sw.getId().toString());
 
-                    if(eth.getSourceMACAddress() != arp.getSenderHardwareAddress()) { //Rule 1
+                    if(! (eth.getSourceMACAddress().equals( arp.getSenderHardwareAddress() ) ) ) { //Rule 1
                         logger.info("Spoof Rule 1 Triggered"); //spoofDetected
                         return Command.STOP; //Stop processing on the packet
                     }
@@ -141,7 +141,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                            logger.info("Spoof Rule 3a Triggered"); //spoofDetected
                            return Command.STOP; //Stop processing on the packet
                        }
-                    } else if (arp.getOpCode() == ArpOpcode.REPLY) {
+                    } else if (arp.getOpCode().equals(ArpOpcode.REPLY)) {
                         if(eth.isBroadcast()) {  //Rule 3b, reply shouldn't be a broadcast
                             logger.info("Spoof Rule 3b Triggered"); //spoofDetected
                             return Command.STOP; //Stop processing on the packet
@@ -149,7 +149,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
 
                         logger.info("ARP Target Hardware Address: {} seen on switch: {}", arp.getTargetHardwareAddress().toString(), sw.getId().toString());
 
-                        if(eth.getDestinationMACAddress() != arp.getTargetHardwareAddress()) { //Rule 4
+                        if(! (eth.getDestinationMACAddress().equals( arp.getTargetHardwareAddress() ) ) ) { //Rule 4
                             logger.info("Spoof Rule 4 Triggered"); //spoofDetected
                             return Command.STOP; //Stop processing on the packet
                         }
@@ -163,7 +163,6 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                             logger.info("Spoof Rule 5 Triggered");  //spoofDetected
                             return Command.STOP; //Stop processing on the packet
                         }
-
                     }
                 } else {
                     /* Unhandled ethertypes */
@@ -174,5 +173,4 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
         }
         return Command.CONTINUE; //pass packet to other modules to continue processing
     }
-
 }
