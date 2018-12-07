@@ -87,7 +87,6 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
             case PACKET_IN:
                 /* Retrieve the deserialized packet in message */
                 Ethernet eth = IFloodlightProviderService.bcStore.get(cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
-
                 /* Various getters and setters are exposed in Ethernet */
 //                MacAddress srcMac = eth.getSourceMACAddress();
 //                VlanVid vlanId = VlanVid.ofVlan(eth.getVlanID());
@@ -98,14 +97,12 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
 //                if (eth.getEtherType() == EthType.IPv4) {
 //                    /* We got an IPv4 packet; get the payload from Ethernet */
 //                    IPv4 ipv4 = (IPv4) eth.getPayload();
-//
 //                    /* Various getters and setters are exposed in IPv4 */
 //                    byte[] ipOptions = ipv4.getOptions();
 //                    IPv4Address dstIp = ipv4.getDestinationAddress();
-//
 //                    /* Still more to come... */
-//
 //                } else
+
                 try {
                     logger.info("Eth Source MAC Address: {} seen on switch: {}", eth.getSourceMACAddress().toString(), sw.getId().toString());
                     logger.info("Eth Dest MAC Address: {} seen on switch: {}", eth.getDestinationMACAddress().toString(), sw.getId().toString());
@@ -134,7 +131,7 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                             logger.info("Spoof Rule 2 Triggered"); //spoofDetected
                             return Command.STOP; //Stop processing on the packet
                         } else {
-                            logger.info("Match Found");
+                            logger.info("Sender Match Found");
                         }
 
                         if (arp.getOpCode().equals(ArpOpcode.REQUEST)) {
@@ -160,9 +157,8 @@ public class ARPPacketInspector implements IOFMessageListener, IFloodlightModule
                                 logger.info("Spoof Rule 5 Triggered");  //spoofDetected
                                 return Command.STOP; //Stop processing on the packet
                             }else {
-                                logger.info("Match Found");
+                                logger.info("Target Match Found");
                             }
-
                         }
 
                     } else {
